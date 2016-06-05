@@ -52,13 +52,7 @@ public class Server {
                 connection.close();
 
             } else {
-                System.out.print("Connexion failed for:\n" +
-                        "host: "+mySQLClientConfig.getString("host")+"\n"+
-                        "port: "+mySQLClientConfig.getInteger("port").toString()+"\n"+
-                        "username: "+mySQLClientConfig.getString("username")+"\n"+
-                        "password: "+mySQLClientConfig.getString("password")+"\n"+
-                        "database: "+mySQLClientConfig.getString("database")+"\n"
-                );
+                this.connexionFailed();
             }
         });
     }
@@ -75,13 +69,7 @@ public class Server {
                 connection.close();
 
             } else {
-                System.out.print("Connexion failed for:\n" +
-                        "host: "+mySQLClientConfig.getString("host")+"\n"+
-                        "port: "+mySQLClientConfig.getInteger("port").toString()+"\n"+
-                        "username: "+mySQLClientConfig.getString("username")+"\n"+
-                        "password: "+mySQLClientConfig.getString("password")+"\n"+
-                        "database: "+mySQLClientConfig.getString("database")+"\n"
-                );
+                this.connexionFailed();
             }
         });
     }
@@ -107,13 +95,7 @@ public class Server {
                 connection.close();
 
             } else {
-                System.out.print("Connexion failed for:\n" +
-                        "host: "+mySQLClientConfig.getString("host")+"\n"+
-                        "port: "+mySQLClientConfig.getInteger("port").toString()+"\n"+
-                        "username: "+mySQLClientConfig.getString("username")+"\n"+
-                        "password: "+mySQLClientConfig.getString("password")+"\n"+
-                        "database: "+mySQLClientConfig.getString("database")+"\n"
-                );
+                this.connexionFailed();
             }
         });
         return chatTableJson;
@@ -144,13 +126,7 @@ public class Server {
                     }
                 });
             }else {
-                System.out.print("Connexion failed for:\n" +
-                        "host: " + mySQLClientConfig.getString("host") + "\n" +
-                        "port: " + mySQLClientConfig.getInteger("port").toString() + "\n" +
-                        "username: " + mySQLClientConfig.getString("username") + "\n" +
-                        "password: " + mySQLClientConfig.getString("password") + "\n" +
-                        "database: " + mySQLClientConfig.getString("database") + "\n"
-                );
+                this.connexionFailed();
             }
         });
     }
@@ -162,5 +138,15 @@ public class Server {
         java.util.Date dt = new java.util.Date();
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(dt);
+    }
+
+    private void connexionFailed(){
+        System.out.print("Connexion failed for:\n" +
+                "host: "+mySQLClientConfig.getString("host")+"\n"+
+                "port: "+mySQLClientConfig.getInteger("port").toString()+"\n"+
+                "username: "+mySQLClientConfig.getString("username")+"\n"+
+                "password: "+mySQLClientConfig.getString("password")+"\n"+
+                "database: "+mySQLClientConfig.getString("database")+"\n"
+        );
     }
 }
