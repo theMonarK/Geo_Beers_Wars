@@ -49,14 +49,13 @@ public class Server extends AbstractVerticle {
     /*
     Configure MySQL Database and crate chat_table if not exits.
      */
-    public void initDB(int port,String password) {
+    private void initDB(int port,String password) {
         this.mySQLClientConfig = new JsonObject()
                 .put("host", "localhost")
                 .put("port", port)
                 .put("username", "root")
                 .put("password", password)
                 .put("database", "geo_beers_wars");
-        Vertx vertx = Vertx.vertx();
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
     }
 
@@ -113,7 +112,7 @@ public class Server extends AbstractVerticle {
     /*
     Return chat_table from geo_beers_wars database
      */
-    public void getChatTable(RoutingContext routingContext){
+    private void getChatTable(RoutingContext routingContext){
 
         //Need to initDB or this.mySQLClient = null
         initDB(3306,"vor9060sj");
@@ -177,7 +176,7 @@ public class Server extends AbstractVerticle {
     /*
     Date generator for database
      */
-    public String getDate(){
+    private String getDate(){
         java.util.Date dt = new java.util.Date();
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(dt);
