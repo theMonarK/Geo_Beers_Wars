@@ -1,7 +1,6 @@
 package org.khaaaaaa.vertx;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -11,6 +10,8 @@ import io.vertx.ext.asyncsql.MySQLClient;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
+import org.khaaaaaa.vertx.model.Message;
 
 
 /**
@@ -44,6 +45,9 @@ public class Server extends AbstractVerticle {
                 .listen(5169);
         // Bind "/api/chat" to the chat_table
         router.get("/api/chat").handler(this::getChatTable);
+
+        router.route("/api/chat*").handler(BodyHandler.create());
+        router.post("/api/chat").handler(this::addChatMsg);
     }
 
     /*
@@ -133,12 +137,19 @@ public class Server extends AbstractVerticle {
                     }
                     else{
                         System.out.print("Select chat_table failed\n");
+                        routingContext.response()
+                                .setStatusCode(400)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Select chat_table failed"));
                     }
                 });
                 connection.close();
 
             } else {
-                this.connexionFailed();
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
             }
         });
     }
@@ -146,12 +157,14 @@ public class Server extends AbstractVerticle {
     /*
     Add a message to the database. personFrom, personTo and message needed. ID and Date generated automatically
      */
-    public void addChatMsg(String from,String to,String message) {
+    public void addChatMsg(RoutingContext routingContext) {
+
+        final Message message = Json.decodeValue(routingContext.getBodyAsString(),Message.class);
         String sql = "INSERT INTO chat_table VALUES (?, ?, ?, ?, ?);";
         JsonArray params = new JsonArray().addNull()
-                .add(from)
-                .add(to)
-                .add(message)
+                .add(message.getFrom())
+                .add(message.getTo())
+                .add(message.getMessage())
                 .add(getDate());
 
         this.mySQLClient.getConnection(resConnection -> {
@@ -161,14 +174,27 @@ public class Server extends AbstractVerticle {
                 connection.updateWithParams(sql, params, resUpdate -> {
                     if (resUpdate.succeeded()) {
                         System.out.print("Chat message added\n");
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(message));
                         connection.close();
                     }
                     else{
                         System.out.print("Chat message failed\n");
+                        routingContext.response()
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Service Unavailable"));
                     }
                 });
             }else {
-                this.connexionFailed();
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
             }
         });
     }
@@ -182,13 +208,18 @@ public class Server extends AbstractVerticle {
         return sdf.format(dt);
     }
 
-    private void connexionFailed(){
-        System.out.print("Connexion failed for:\n" +
-                "host: "+mySQLClientConfig.getString("host")+"\n"+
-                "port: "+mySQLClientConfig.getInteger("port").toString()+"\n"+
-                "username: "+mySQLClientConfig.getString("username")+"\n"+
-                "password: "+mySQLClientConfig.getString("password")+"\n"+
-                "database: "+mySQLClientConfig.getString("database")+"\n"
+    /*
+    Generate request error for wrong connexion
+     */
+
+    private String connexionFailed(){
+        String fail = ("Connexion failed for:<br>" +
+                "host: "+mySQLClientConfig.getString("host")+"<br>"+
+                "port: "+mySQLClientConfig.getInteger("port").toString()+"<br>"+
+                "username: "+mySQLClientConfig.getString("username")+"<br>"+
+                "password: "+mySQLClientConfig.getString("password")+"<br>"+
+                "database: "+mySQLClientConfig.getString("database")+"<br>"
         );
+        return fail;
     }
 }
