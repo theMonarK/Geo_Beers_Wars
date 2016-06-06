@@ -1,36 +1,72 @@
 package org.khaaaaaa.vertx;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.asyncsql.AsyncSQLClient;
 import io.vertx.ext.asyncsql.MySQLClient;
 import io.vertx.ext.sql.SQLConnection;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 
 
 /**
  * Created by anthony on 31/05/2016.
  */
-public class Server {
+public class Server extends AbstractVerticle {
 
     private JsonObject mySQLClientConfig;
     private AsyncSQLClient mySQLClient;
 
+    /*
+    Start HTTP server and route GET /api/chat to have JsonArray of chat_table
+     */
+
+    @Override
+    public void start() throws Exception {
+
+        Router router = Router.router(vertx);
+        // Bind "/" to the greatest
+        router.route("/").handler(routingContext -> {
+            HttpServerResponse response = routingContext.response();
+            response
+                    .putHeader("content-type", "text/html")
+                    .end("<h1>Khaaaaaa is great! Fear Khaaaaaa</h1>");
+        });
+
+        // Create the HTTP server and pass the "accept" method to the request handler.
+        vertx
+                .createHttpServer()
+                .requestHandler(router::accept)
+                .listen(5169);
+        // Bind "/api/chat" to the chat_table
+        router.get("/api/chat").handler(this::getChatTable);
+    }
 
     /*
     Configure MySQL Database and crate chat_table if not exits.
      */
-    public void initDB(int port,String password){
-         this.mySQLClientConfig = new JsonObject()
+    public void initDB(int port,String password) {
+        this.mySQLClientConfig = new JsonObject()
                 .put("host", "localhost")
-                .put("port",port)
-                .put("username","root")
-                .put("password",password)
-                .put("database","geo_beers_wars");
+                .put("port", port)
+                .put("username", "root")
+                .put("password", password)
+                .put("database", "geo_beers_wars");
         Vertx vertx = Vertx.vertx();
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
+    }
 
-        String sql = "CREATE TABLE IF NOT EXISTS `chat_table` (" +
+    /*
+    Create chat_table in the MySQL DB if doesn't already exist
+     */
+
+    public void createChatTable(){
+
+        String sqlChat = "CREATE TABLE IF NOT EXISTS `chat_table` (" +
                 "  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT," +
                 "  `personFrom` VARCHAR(32) NOT NULL," +
                 "  `personTo` VARCHAR(32) NOT NULL," +
@@ -42,7 +78,7 @@ public class Server {
                 SQLConnection connection = resConnection.result();
                 System.out.print("Connexion established\n");
 
-                connection.execute(sql, execute -> {
+                connection.execute(sqlChat, execute -> {
                     if (execute.succeeded()) {
                         System.out.println("Table initialized !");
                     } else {
@@ -77,16 +113,24 @@ public class Server {
     /*
     Return chat_table from geo_beers_wars database
      */
-    public JsonArray[] getChatTable(){
-        final JsonArray[] chatTableJson = {new JsonArray()};
+    public void getChatTable(RoutingContext routingContext){
+
+        //Need to initDB or this.mySQLClient = null
+        initDB(3306,"vor9060sj");
         this.mySQLClient.getConnection(resConnection -> {
+
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
                 System.out.print("Connexion established\n");
                 connection.query("SELECT * FROM geo_beers_wars.chat_table;", resSelectChat->{
+
                     if(resSelectChat.succeeded()) {
                         System.out.print("Select chat_table worked\n");
-                        chatTableJson[0] = (JsonArray) resSelectChat.result().toJson().getMap().get("rows");
+
+                        // Encode JsonArray of the chat_table and send it
+                        routingContext.response()
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(resSelectChat.result().toJson().getMap().get("rows")));
                     }
                     else{
                         System.out.print("Select chat_table failed\n");
@@ -98,7 +142,6 @@ public class Server {
                 this.connexionFailed();
             }
         });
-        return chatTableJson;
     }
 
     /*

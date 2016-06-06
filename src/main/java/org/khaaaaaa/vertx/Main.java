@@ -1,6 +1,7 @@
 package org.khaaaaaa.vertx;
 
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -17,11 +18,18 @@ public class Main {
 
     public static void main(String... args) {
 
-        Server server = new Server();
-        server.initDB(3306,"password");
+        Vertx vertx = Vertx.vertx();
+        vertx.deployVerticle(Server.class.getName(), res -> {
+            if (res.succeeded()) {
+                System.out.println("Server started");
+            } else {
+                System.out.println("Server failed... Looser!");
+            }
+        });
+        //server.initDB(3306,"password");
+        //server.createChatTable();
         //server.testConnectionDB();
-        //JsonArray[] chatTable = server.getChatTable();
-        server.addChatMsg("Dude","Test","Come on!");
+        //server.addChatMsg("Dude","Test","Come on!");
 
     }
 
