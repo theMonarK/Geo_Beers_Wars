@@ -119,7 +119,7 @@ public class Server extends AbstractVerticle {
     private void getChatTable(RoutingContext routingContext){
 
         //Need to initDB or this.mySQLClient = null
-        initDB(3306,"vor9060sj");
+        initDB(3306,"password");
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
