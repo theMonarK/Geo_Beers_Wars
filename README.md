@@ -8,7 +8,7 @@ HTTP Server:
 * host: localhost
 * port: 5169
 
-MySQL Database settings preffered (password and port are asked when you use server.initDB()):
+MySQL Database settings preffered (Configuration in server.initDB()):
 * "host": "localhost"
 * "port":3306
 * "username":"root"
