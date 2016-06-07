@@ -15,6 +15,25 @@ MySQL Database settings preffered (Configuration in server.initDB()):
 * "password":...
 * "database":"geo_beers_wars
 
+
+Requests:
+
+Get chat_table:
+GET http://localhost:5169/api/chat
+
+Get pub_table:
+GET http://localhost:5169/api/chat
+
+Add chat to the chat_table:
+POST http://localhost:5169/api/pub
+body: {"from":"web", "to":"Khaaaaaa", "message": "What's up?"}
+
+Add chat to the chat_table
+POST http://localhost:5169/api/pub
+body: {"latitude":"69.696969", "longitude":"51.515151", "icon": "red"}
+
+POST request will response with Json Object created in MySQL databse
+
 If Intellij suddenly throwing ClassNotFoundException
 * File --> Project Structure --> Modules
 * Dependencies & add slf4J-api-1.X.XX (see utils folder)
