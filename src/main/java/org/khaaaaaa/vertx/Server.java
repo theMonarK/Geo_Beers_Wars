@@ -11,7 +11,9 @@ import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import org.khaaaaaa.vertx.model.Message;
+import org.khaaaaaa.vertx.model.Pub;
 
 
 /**
@@ -51,6 +53,13 @@ public class Server extends AbstractVerticle {
 
         // Bind "/api/pub" to the pub_table
         router.get("/api/pub").handler(this::getPubTable);
+
+        router.route("/api/pub*").handler(BodyHandler.create());
+        router.post("/api/pub").handler(this::addPub);
+        router.put("/api/pub/:id").handler(this::updatePub);
+
+        // Serve static resources from the /assets directory
+        router.route("/assets/*").handler(StaticHandler.create("assets"));
     }
 
     /*
@@ -61,7 +70,7 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "vor9060sj")
+                .put("password", "password")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
@@ -96,6 +105,40 @@ public class Server extends AbstractVerticle {
                 });
 
                 connection.close();
+                System.out.print("Connexion closed\n");
+
+            } else {
+                this.connexionFailed();
+            }
+        });
+    }
+
+    private void createUserTable(){
+
+        String sqlUser = "CREATE TABLE IF NOT EXISTS `user_table` (" +
+                "  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT," +
+                "  `username` VARCHAR(32) NOT NULL," +
+                "  `password` VARCHAR(32) NOT NULL," +
+                "  `team`  VARCHAR(32) NOT NULL," +
+                "  `last_id_pub` INT NOT NULL," +
+                "  'last_time DATETIME NOT NULL);";
+
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+
+                //Create chat_table
+                connection.execute(sqlUser, execute -> {
+                    if (execute.succeeded()) {
+                        System.out.println("User Table created !");
+                    } else {
+                        System.out.println("User table failed !");
+                    }
+                });
+
+                connection.close();
+                System.out.print("Connexion closed\n");
 
             } else {
                 this.connexionFailed();
@@ -127,6 +170,7 @@ public class Server extends AbstractVerticle {
                 });
 
                 connection.close();
+                System.out.print("Connexion closed\n");
 
             } else {
                 this.connexionFailed();
@@ -135,7 +179,7 @@ public class Server extends AbstractVerticle {
     }
 
     /*
-    Test if the connexion with the MySQL database can be established
+    Test if the connexion with MySQL database can be established
      */
     public void testConnectionDB(){
         this.mySQLClient.getConnection(resConnection -> {
@@ -144,6 +188,7 @@ public class Server extends AbstractVerticle {
                 SQLConnection connection = resConnection.result();
                 System.out.print("Connexion established\n");
                 connection.close();
+                System.out.print("Connexion closed\n");
 
             } else {
                 this.connexionFailed();
@@ -182,6 +227,7 @@ public class Server extends AbstractVerticle {
                     }
                 });
                 connection.close();
+                System.out.print("Connexion closed\n");
 
             } else {
                 routingContext.response()
@@ -223,6 +269,7 @@ public class Server extends AbstractVerticle {
                     }
                 });
                 connection.close();
+                System.out.print("Connexion closed\n");
 
             } else {
                 routingContext.response()
@@ -236,7 +283,7 @@ public class Server extends AbstractVerticle {
     /*
     Add a message to the database. personFrom, personTo and message needed. ID and Date generated automatically
      */
-    public void addChatMsg(RoutingContext routingContext) {
+    private void addChatMsg(RoutingContext routingContext) {
 
         final Message message = Json.decodeValue(routingContext.getBodyAsString(),Message.class);
         String sql = "INSERT INTO chat_table VALUES (?, ?, ?, ?, ?);";
@@ -246,6 +293,7 @@ public class Server extends AbstractVerticle {
                 .add(message.getMessage())
                 .add(getDate());
 
+        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
@@ -253,6 +301,7 @@ public class Server extends AbstractVerticle {
                 connection.updateWithParams(sql, params, resUpdate -> {
                     if (resUpdate.succeeded()) {
                         System.out.print("Chat message added\n");
+                        message.setId(resUpdate.result().getKeys().getInteger(0));
 
                         //Sending the message as Json and code 201 (CREATED)
                         routingContext.response()
@@ -260,6 +309,7 @@ public class Server extends AbstractVerticle {
                                 .putHeader("content-type", "application/json; charset=utf-8")
                                 .end(Json.encodePrettily(message));
                         connection.close();
+                        System.out.print("Connexion closed\n");
                     }
 
                     //Sending error response
@@ -283,6 +333,108 @@ public class Server extends AbstractVerticle {
     }
 
 
+    /*
+    Add a pub to the database. latitude, longitude and icon needed. ID generated automatically
+     */
+
+    private void addPub(RoutingContext routingContext) {
+
+        Pub pub = Json.decodeValue(routingContext.getBodyAsString(),Pub.class);
+        String sql = "INSERT INTO pub_table VALUES (?, ?, ?, ?);";
+
+        // Normalize icon name base for the db (and dumb ass front end..)
+        pub.setIcon(this.normalizeIcon(pub.getIcon()));
+        JsonArray params = new JsonArray().addNull()
+                .add(pub.getLatitude())
+                .add(pub.getLongitude())
+                .add(pub.getIcon());
+
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.updateWithParams(sql, params, resUpdate -> {
+                    if (resUpdate.succeeded()) {
+                        System.out.print("Pub added\n");
+                        pub.setId(resUpdate.result().getKeys().getInteger(0));
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(pub));
+                        connection.close();
+                        System.out.print("Connexion closed\n");
+                    }
+
+                    //Sending error response
+                    else{
+                        System.out.print("Add pub failed\n");
+                        routingContext.response()
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Service Unavailable"));
+                    }
+                });
+
+                //Sending error response
+            }else {
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
+            }
+        });
+    }
+
+    private void updatePub(RoutingContext routingContext) {
+
+        final String id = routingContext.request().getParam("id");
+        JsonObject json = routingContext.getBodyAsJson();
+        String sqlUpdate = "UPDATE pub_table SET latitude = ?, longitude=?, icon=? WHERE id=?";
+        JsonArray params = new JsonArray().add(json.getString("latitude"))
+                .add(json.getString("longitude"))
+                .add(this.normalizeIcon(json.getString("icon")))
+                .add(id);
+
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.updateWithParams(sqlUpdate, params, resUpdate -> {
+                    if (resUpdate.succeeded()) {
+                        System.out.print("Pub updated\n");
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(params));
+                        connection.close();
+                        System.out.print("Connexion closed\n");
+                    }
+
+                    //Sending error response
+                    else{
+                        System.out.print("Pub update failed\n");
+                        routingContext.response()
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Service Unavailable"));
+                    }
+                });
+
+                //Sending error response
+            }else {
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
+            }
+        });
+    }
 
 
     /*
@@ -307,5 +459,19 @@ public class Server extends AbstractVerticle {
                 "database: "+mySQLClientConfig.getString("database")+"<br>"
         );
         return fail;
+    }
+
+    private String normalizeIcon(String icon){
+        switch(icon){
+            case "rouge":
+                return ".../img/rouge.png";
+            case "rose":
+                return ".../img/rose.png";
+            case "bleu":
+                return ".../img/bleu.png";
+            case "vert":
+                return ".../img/vert.png";
+        }
+        return ".../img/rouge.png";
     }
 }

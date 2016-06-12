@@ -1,0 +1,11 @@
+{
+  "name": "polymer-beers",
+  "version": "0.0.0",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "dependencies": {    
+    "bootstrap": "~3.3.6",
+    "polymer": "~1.4.0",
+    "iron-ajax": "~1.2.0",
+    "carbon-route": "~0.8.4"
+  }
+}

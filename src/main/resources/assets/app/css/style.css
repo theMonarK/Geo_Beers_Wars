@@ -1,0 +1,92 @@
+body{
+  padding-top: 50px;
+  background-color: #364566;
+  height: 100%;
+  font-family: Times New Roman ;
+  margin: 0;
+}
+
+.navbar ul {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #335299;
+}
+
+.navbar .active {
+  background-color: #997A33;
+}
+
+.navbar li {
+  display: inline-block;
+}
+
+.navbar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+.navbar li a:hover {
+  background-color: #E6B74D;
+}
+
+
+.map{
+  background-color: #999999;
+  width: 53%;
+  height: 500px;
+  margin-left: 2%;
+  margin-top:10px;
+  border:2px solid #4C3D99;
+  float: left;
+}
+
+
+.chat{
+  margin-right: 20px;
+  margin-top: 10px;
+  float: right;
+  border-radius: 3px;
+  height: 70%;
+  width: 40%;
+  border:2px solid #4C3D99;
+  background-color:#3D4166;
+}
+
+#chatbox{
+  height:500px;
+  overflow:auto;
+  background-color:#4C3D99;
+  border:2px solid #3D4166;
+}
+
+#inputz{
+  display: flex;
+}
+
+.field-input{
+  background-color: #E5D95C;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  border: none;
+  resize: none;
+  width:60%;
+}
+
+#send {
+  padding: 10px;
+  margin: 5px;
+  border:0;
+  background-color: #99903D;
+  border-radius: 5px;
+}
