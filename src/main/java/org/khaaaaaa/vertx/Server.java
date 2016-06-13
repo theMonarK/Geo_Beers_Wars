@@ -17,7 +17,6 @@ import org.khaaaaaa.vertx.model.Pub;
 import org.khaaaaaa.vertx.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -81,14 +80,15 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "vor9060sj")
+                .put("password", "password")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
         this.createChatTable();
         this.createUserTable();
+
         vertx.setPeriodic(300000, id -> {
-            // This handler will get called every second
+            // This handler will get called every 5 minutes
             System.out.println("Update user db");
             this.updateScore();
         });
@@ -310,7 +310,6 @@ public class Server extends AbstractVerticle {
     private void updateScore(){
 
         //Need to initDB or this.mySQLClient = null
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -319,6 +318,7 @@ public class Server extends AbstractVerticle {
                 connection.query("SELECT id,score FROM geo_beers_wars.user_table WHERE last_time >= NOW() - INTERVAL 35 MINUTE;", resSelectUser->{
 
                     if(resSelectUser.succeeded()) {
+
 
                         List<JsonObject> updateList = resSelectUser.result().getRows();
                         for (JsonObject update:updateList) {
@@ -350,6 +350,7 @@ public class Server extends AbstractVerticle {
                 System.out.print("Connexion failed\n");
             }
         });
+
     }
 
     /*
