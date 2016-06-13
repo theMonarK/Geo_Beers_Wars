@@ -16,6 +16,9 @@ import org.khaaaaaa.vertx.model.Message;
 import org.khaaaaaa.vertx.model.Pub;
 import org.khaaaaaa.vertx.model.User;
 
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Created by anthony on 31/05/2016.
@@ -61,6 +64,8 @@ public class Server extends AbstractVerticle {
 
         // Bind "/api/pub" to the pub_table
         router.get("/api/user").handler(this::getUserTable);
+
+        router.route("/api/user*").handler(BodyHandler.create());
         router.post("/api/user").handler(this::addUser);
         router.put("/api/user/:id").handler(this::updateUser);
 
@@ -76,12 +81,17 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "password")
+                .put("password", "vor9060sj")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
         this.createChatTable();
         this.createUserTable();
+        vertx.setPeriodic(300000, id -> {
+            // This handler will get called every second
+            System.out.println("Update user db");
+            this.updateScore();
+        });
     }
 
     /*
@@ -128,6 +138,7 @@ public class Server extends AbstractVerticle {
                 "  `password` VARCHAR(32) NOT NULL," +
                 "  `team`  VARCHAR(32) NOT NULL," +
                 "  `last_id_pub` INT NOT NULL," +
+                "  `score` INT NULL," +
                 "  `last_time` DATETIME NOT NULL);";
 
         this.mySQLClient.getConnection(resConnection -> {
@@ -260,16 +271,16 @@ public class Server extends AbstractVerticle {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
                 System.out.print("Connexion established\n");
-                connection.query("SELECT * FROM geo_beers_wars.user_table;", resSelectChat->{
+                connection.query("SELECT * FROM geo_beers_wars.user_table;", resSelectUser->{
 
-                    if(resSelectChat.succeeded()) {
+                    if(resSelectUser.succeeded()) {
                         System.out.print("Select user_table\n");
 
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
                                 .putHeader("content-type", "application/json; charset=utf-8")
                                 .putHeader("Access-Control-Allow-Origin", "*")
-                                .end(Json.encodePrettily(resSelectChat.result().toJson().getMap().get("rows")));
+                                .end(Json.encodePrettily(resSelectUser.result().toJson().getMap().get("rows")));
                     }
                     else{
                         System.out.print("Select user_table failed\n");
@@ -289,6 +300,54 @@ public class Server extends AbstractVerticle {
                         .putHeader("content-type", "text/html")
                         .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
+            }
+        });
+    }
+
+    /*
+   Return user_table from geo_beers_wars database
+    */
+    private void updateScore(){
+
+        //Need to initDB or this.mySQLClient = null
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.query("SELECT id,score FROM geo_beers_wars.user_table WHERE last_time >= NOW() - INTERVAL 35 MINUTE;", resSelectUser->{
+
+                    if(resSelectUser.succeeded()) {
+
+                        List<JsonObject> updateList = resSelectUser.result().getRows();
+                        for (JsonObject update:updateList) {
+                            JsonArray params = new JsonArray().add(update.getInteger("score")+1)
+                                    .add(update.getInteger("id"));
+                            String sqlUpdate = "UPDATE user_table SET score = ? WHERE id=?";
+                            connection.updateWithParams(sqlUpdate, params, resUpdate -> {
+                                if (resUpdate.succeeded()) {
+                                    System.out.print("User update\n");
+                                    connection.close();
+                                    System.out.print("Connexion closed\n");
+                                }
+
+                                //Sending error response
+                                else {
+                                    System.out.print("User update failed\n");
+                                }
+                            });
+                        }
+                    }
+                    else{
+                        System.out.print("Update failed\n");
+                    }
+                });
+                connection.close();
+                System.out.print("Connexion closed\n");
+
+            } else {
+                System.out.print("Connexion failed\n");
             }
         });
     }

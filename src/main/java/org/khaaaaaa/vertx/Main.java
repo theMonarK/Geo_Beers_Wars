@@ -27,15 +27,6 @@ public class Main {
             }
         });
 
-        vertx.setPeriodic(300000, id -> {
-            // This handler will get called every second
-            System.out.println("Update user db");
-        });
-        //server.initDB(3306,"password");
-        //server.createChatTable();
-        //server.testConnectionDB();
-        //server.addChatMsg("Dude","Test","Come on!");
-
     }
 
 }
