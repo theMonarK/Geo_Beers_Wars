@@ -222,6 +222,7 @@ public class Server extends AbstractVerticle {
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
                                 .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily(resSelectChat.result().toJson().getMap().get("rows")));
                     }
                     else{
@@ -229,6 +230,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(400)
                                 .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily("Select chat_table failed"));
                     }
                 });
@@ -239,6 +241,7 @@ public class Server extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
             }
         });
@@ -264,6 +267,7 @@ public class Server extends AbstractVerticle {
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
                                 .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily(resSelectChat.result().toJson().getMap().get("rows")));
                     }
                     else{
@@ -271,6 +275,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(400)
                                 .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily("Select user_table failed"));
                     }
                 });
@@ -281,6 +286,7 @@ public class Server extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
             }
         });
@@ -313,6 +319,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(400)
                                 .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily("Select pub_table failed"));
                     }
                 });
@@ -323,6 +330,7 @@ public class Server extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
             }
         });
@@ -366,6 +374,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(503)
                                 .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily("Service Unavailable"));
                     }
                 });
@@ -375,6 +384,7 @@ public class Server extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
             }
         });
@@ -411,6 +421,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(201)
                                 .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily(pub));
                         connection.close();
                         System.out.print("Connexion closed\n");
@@ -422,6 +433,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(503)
                                 .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily("Service Unavailable"));
                     }
                 });
@@ -431,6 +443,7 @@ public class Server extends AbstractVerticle {
                 routingContext.response()
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .end(this.connexionFailed());
             }
         });
@@ -467,6 +480,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(201)
                                 .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily(user));
                         connection.close();
                         System.out.print("Connexion closed\n");
