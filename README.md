@@ -26,7 +26,7 @@ Add chat to the chat_table:
 * body: {"from":"web", "to":"Khaaaaaa", "message": "What's up?"}
 
 Get pub_table:
-* GET http://localhost:5169/api/chat
+* GET http://localhost:5169/api/pub
 
 Add pub to pub_table
 * POST http://localhost:5169/api/pub
