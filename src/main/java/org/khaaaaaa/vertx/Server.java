@@ -14,6 +14,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import org.khaaaaaa.vertx.model.Message;
 import org.khaaaaaa.vertx.model.Pub;
+import org.khaaaaaa.vertx.model.User;
 
 
 /**
@@ -58,6 +59,10 @@ public class Server extends AbstractVerticle {
         router.post("/api/pub").handler(this::addPub);
         router.put("/api/pub/:id").handler(this::updatePub);
 
+        // Bind "/api/pub" to the pub_table
+        router.get("/api/user").handler(this::getUserTable);
+        router.post("/api/user").handler(this::addUser);
+
         // Serve static resources from the /assets directory
         router.route("/assets/*").handler(StaticHandler.create("assets"));
     }
@@ -70,11 +75,12 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "password")
+                .put("password", "vor9060sj")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
         this.createChatTable();
+        this.createUserTable();
     }
 
     /*
@@ -121,7 +127,7 @@ public class Server extends AbstractVerticle {
                 "  `password` VARCHAR(32) NOT NULL," +
                 "  `team`  VARCHAR(32) NOT NULL," +
                 "  `last_id_pub` INT NOT NULL," +
-                "  'last_time DATETIME NOT NULL);";
+                "  `last_time` DATETIME NOT NULL);";
 
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
@@ -211,7 +217,7 @@ public class Server extends AbstractVerticle {
                 connection.query("SELECT * FROM geo_beers_wars.chat_table;", resSelectChat->{
 
                     if(resSelectChat.succeeded()) {
-                        System.out.print("Select chat_table worked\n");
+                        System.out.print("Select chat_table\n");
 
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
@@ -224,6 +230,48 @@ public class Server extends AbstractVerticle {
                                 .setStatusCode(400)
                                 .putHeader("content-type", "text/html")
                                 .end(Json.encodePrettily("Select chat_table failed"));
+                    }
+                });
+                connection.close();
+                System.out.print("Connexion closed\n");
+
+            } else {
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
+            }
+        });
+    }
+
+    /*
+   Return user_table from geo_beers_wars database
+    */
+    private void getUserTable(RoutingContext routingContext){
+
+        //Need to initDB or this.mySQLClient = null
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.query("SELECT * FROM geo_beers_wars.user_table;", resSelectChat->{
+
+                    if(resSelectChat.succeeded()) {
+                        System.out.print("Select user_table\n");
+
+                        // Encode JsonArray of the chat_table and send it
+                        routingContext.response()
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(resSelectChat.result().toJson().getMap().get("rows")));
+                    }
+                    else{
+                        System.out.print("Select user_table failed\n");
+                        routingContext.response()
+                                .setStatusCode(400)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Select user_table failed"));
                     }
                 });
                 connection.close();
@@ -253,7 +301,7 @@ public class Server extends AbstractVerticle {
                 connection.query("SELECT * FROM geo_beers_wars.pub_table;", resSelectPub->{
 
                     if(resSelectPub.succeeded()) {
-                        System.out.print("Select pub_table worked\n");
+                        System.out.print("Select pub_table\n");
 
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
@@ -388,6 +436,64 @@ public class Server extends AbstractVerticle {
         });
     }
 
+    /*
+    Add a pub to the database. latitude, longitude and icon needed. ID generated automatically
+     */
+
+    private void addUser(RoutingContext routingContext) {
+
+        User user = Json.decodeValue(routingContext.getBodyAsString(),User.class);
+        String sql = "INSERT INTO user_table VALUES (?, ?, ?, ?, ?, ?);";
+
+        // Normalize icon name base for the db (and dumb ass front end..)
+        JsonArray params = new JsonArray().addNull()
+                .add(user.getUsername())
+                .add(user.getPassword())
+                .add(user.getTeam())
+                .add(user.getLast_id_pub())
+                .add(getDate());
+
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.updateWithParams(sql, params, resUpdate -> {
+                    if (resUpdate.succeeded()) {
+                        System.out.print("User added\n");
+                        user.setId(resUpdate.result().getKeys().getInteger(0));
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(user));
+                        connection.close();
+                        System.out.print("Connexion closed\n");
+                    }
+
+                    //Sending error response
+                    else{
+                        System.out.print("Add user failed\n");
+                        routingContext.response()
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Service Unavailable"));
+                    }
+                });
+
+                //Sending error response
+            }else {
+                routingContext.response()
+                        .putHeader("Access-Control-Allow-Origin", "*")
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
+            }
+        });
+    }
+
     private void updatePub(RoutingContext routingContext) {
 
         final String id = routingContext.request().getParam("id");
@@ -409,6 +515,7 @@ public class Server extends AbstractVerticle {
 
                         //Sending the message as Json and code 201 (CREATED)
                         routingContext.response()
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .setStatusCode(201)
                                 .putHeader("content-type", "application/json; charset=utf-8")
                                 .end(Json.encodePrettily(params));
@@ -420,6 +527,7 @@ public class Server extends AbstractVerticle {
                     else{
                         System.out.print("Pub update failed\n");
                         routingContext.response()
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .setStatusCode(503)
                                 .putHeader("content-type", "text/html")
                                 .end(Json.encodePrettily("Service Unavailable"));
@@ -429,12 +537,15 @@ public class Server extends AbstractVerticle {
                 //Sending error response
             }else {
                 routingContext.response()
+                        .putHeader("Access-Control-Allow-Origin", "*")
                         .setStatusCode(400)
                         .putHeader("content-type", "text/html")
                         .end(this.connexionFailed());
             }
         });
     }
+
+
 
 
     /*

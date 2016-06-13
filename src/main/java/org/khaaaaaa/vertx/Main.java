@@ -23,8 +23,13 @@ public class Main {
             if (res.succeeded()) {
                 System.out.println("Server started");
             } else {
-                System.out.println("Server failed... Looser!");
+                System.out.println("Server failed");
             }
+        });
+
+        vertx.setPeriodic(300000, id -> {
+            // This handler will get called every second
+            System.out.println("Update user db");
         });
         //server.initDB(3306,"password");
         //server.createChatTable();
