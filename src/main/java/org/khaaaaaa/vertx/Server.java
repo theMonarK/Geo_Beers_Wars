@@ -62,6 +62,7 @@ public class Server extends AbstractVerticle {
         // Bind "/api/pub" to the pub_table
         router.get("/api/user").handler(this::getUserTable);
         router.post("/api/user").handler(this::addUser);
+        router.put("/api/user/:id").handler(this::updateUser);
 
         // Serve static resources from the /assets directory
         router.route("/assets/*").handler(StaticHandler.create("assets"));
@@ -75,7 +76,7 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "vor9060sj")
+                .put("password", "password")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
@@ -312,6 +313,7 @@ public class Server extends AbstractVerticle {
                         // Encode JsonArray of the chat_table and send it
                         routingContext.response()
                                 .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
                                 .end(Json.encodePrettily(resSelectPub.result().toJson().getMap().get("rows")));
                     }
                     else{
@@ -455,10 +457,9 @@ public class Server extends AbstractVerticle {
 
     private void addUser(RoutingContext routingContext) {
 
-        User user = Json.decodeValue(routingContext.getBodyAsString(),User.class);
+        final User user = Json.decodeValue(routingContext.getBodyAsString(),User.class);
         String sql = "INSERT INTO user_table VALUES (?, ?, ?, ?, ?, ?);";
 
-        // Normalize icon name base for the db (and dumb ass front end..)
         JsonArray params = new JsonArray().addNull()
                 .add(user.getUsername())
                 .add(user.getPassword())
@@ -540,6 +541,57 @@ public class Server extends AbstractVerticle {
                     //Sending error response
                     else{
                         System.out.print("Pub update failed\n");
+                        routingContext.response()
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .end(Json.encodePrettily("Service Unavailable"));
+                    }
+                });
+
+                //Sending error response
+            }else {
+                routingContext.response()
+                        .putHeader("Access-Control-Allow-Origin", "*")
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .end(this.connexionFailed());
+            }
+        });
+    }
+
+    private void updateUser(RoutingContext routingContext) {
+
+        final String id = routingContext.request().getParam("id");
+        JsonObject json = routingContext.getBodyAsJson();
+        String sqlUpdate = "UPDATE user_table SET team = ?, last_id_pub=?, last_time=? WHERE id=?";
+        JsonArray params = new JsonArray().add(json.getString("team"))
+                .add(json.getInteger("last_id_pub"))
+                .add(this.getDate())
+                .add(id);
+
+        initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.updateWithParams(sqlUpdate, params, resUpdate -> {
+                    if (resUpdate.succeeded()) {
+                        System.out.print("User updated\n");
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(params));
+                        connection.close();
+                        System.out.print("Connexion closed\n");
+                    }
+
+                    //Sending error response
+                    else{
+                        System.out.print("User update failed\n");
                         routingContext.response()
                                 .putHeader("Access-Control-Allow-Origin", "*")
                                 .setStatusCode(503)
