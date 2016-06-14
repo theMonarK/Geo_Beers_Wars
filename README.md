@@ -13,7 +13,7 @@ MySQL Database settings preffered (Configuration in server.initDB()):
 * "port":3306
 * "username":"root"
 * "password":...
-* "database":"geo_beers_wars
+* "database":"geo_beers_wars"
 
 
 Requests:
@@ -36,7 +36,49 @@ Update pub
 * PUT http://localhost:5169/api/pub/id (http://localhost:5169/api/pub/1 for id 1)
 * body: {"latitude":"2.2", "longitude":"2.2", "icon": "rouge"}
 
+Get user_table:
+* GET http://localhost:5169/api/user
+
+Add user to user_table
+* POST http://localhost:5169/api/user
+* body: {"username":"Khaaaaaa", "password":"rate", "team": "rouge", "last_id_pub": 1}
+
+Update user
+* PUT http://localhost:5169/api/user/id (http://localhost:5169/api/user/1 for id 1)
+* body: {"team":"bleu", "last_id_pub":"2"}
+
+Get team score
+* GET http://localhost:5169/api/team
+
 POST request will response with Json Object created in MySQL databse
+
+chat_table:
+* id
+* personFrom
+* personTo
+* message
+* date
+
+pub_table:
+* id
+* latitude
+* longitude
+* icon
+
+user_table:
+* id
+* username
+* password
+* team
+* last_id_pub
+* score
+* last_time
+
+Team:
+* Bleu
+* Rouge
+* Rose
+* Vert
 
 If Intellij suddenly throwing ClassNotFoundException
 * File --> Project Structure --> Modules
