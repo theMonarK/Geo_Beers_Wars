@@ -42,6 +42,7 @@ public class Server extends AbstractVerticle {
                     .putHeader("content-type", "text/html")
                     .end("<h1>Khaaaaaa is great! Fear Khaaaaaa</h1>");
         });
+        this.initDB();
 
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx
@@ -60,6 +61,7 @@ public class Server extends AbstractVerticle {
         router.route("/api/pub*").handler(BodyHandler.create());
         router.post("/api/pub").handler(this::addPub);
         router.put("/api/pub/:id").handler(this::updatePub);
+        router.post("/api/pubId").handler(this::getIdPub);
 
         // Bind "/api/pub" to the pub_table
         router.get("/api/user").handler(this::getUserTable);
@@ -169,7 +171,6 @@ public class Server extends AbstractVerticle {
 
     private void getTeamScore(RoutingContext routingContext){
 
-        this.initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -259,13 +260,50 @@ public class Server extends AbstractVerticle {
         });
     }
 
+    private void getIdPub(RoutingContext routingContext) {
+
+        final Pub pub = Json.decodeValue(routingContext.getBodyAsString(),Pub.class);
+        String sql = "SELECT id FROM pub_table WHERE latitude=? AND longitude=?";
+        JsonArray params = new JsonArray().add(pub.getLatitude())
+                .add(pub.getLongitude());
+
+        this.mySQLClient.getConnection(resConnection -> {
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.updateWithParams(sql, params, resUpdate -> {
+                    System.out.print("test");
+                    if (resUpdate.succeeded()) {
+                        pub.setId(resUpdate.result().getKeys().getInteger(0));
+
+                        //Sending the message as Json and code 201 (CREATED)
+                        routingContext.response()
+                                .setStatusCode(201)
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .end(Json.encodePrettily(pub));
+                        connection.close();
+                        System.out.print("Connexion closed\n");
+                    }
+
+                    //Sending error response
+                    else{
+                        routingContext.response()
+                                .setStatusCode(503)
+                                .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .end(Json.encodePrettily("Service Unavailable"));
+                    }
+                });
+
+            }
+        });
+    }
+
     /*
     Return chat_table from geo_beers_wars database
      */
     private void getChatTable(RoutingContext routingContext){
 
-        //Need to initDB or this.mySQLClient = null
-        //initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -309,8 +347,6 @@ public class Server extends AbstractVerticle {
     */
     private void getUserTable(RoutingContext routingContext){
 
-        //Need to initDB or this.mySQLClient = null
-        //initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -404,7 +440,6 @@ public class Server extends AbstractVerticle {
     private void getPubTable(RoutingContext routingContext){
 
         //Need to initDB or this.mySQLClient = null
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -456,7 +491,6 @@ public class Server extends AbstractVerticle {
                 .add(message.getMessage())
                 .add(getDate());
 
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
@@ -514,7 +548,6 @@ public class Server extends AbstractVerticle {
                 .add(pub.getLongitude())
                 .add(pub.getIcon());
 
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
@@ -572,7 +605,6 @@ public class Server extends AbstractVerticle {
                 .add(user.getLast_id_pub())
                 .add(getDate());
 
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
@@ -624,7 +656,6 @@ public class Server extends AbstractVerticle {
                 .add(this.normalizeIcon(json.getString("icon")))
                 .add(id);
 
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
@@ -675,7 +706,6 @@ public class Server extends AbstractVerticle {
                 .add(this.getDate())
                 .add(id);
 
-        initDB();
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
                 SQLConnection connection = resConnection.result();
