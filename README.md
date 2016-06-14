@@ -34,7 +34,7 @@ Add pub to pub_table
 
 Update pub
 * PUT http://localhost:5169/api/pub/latitude (http://localhost:5169/api/pub/2.2 for latitude 2.2)
-* body: {"longitude":"2.2", "icon": "rouge"}
+* body: {"longitude":2.2, "icon": "rouge"}
 
 Get pub ID
 * POST http://localhost:5169/api/pubId
