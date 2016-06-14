@@ -68,6 +68,9 @@ public class Server extends AbstractVerticle {
         router.post("/api/user").handler(this::addUser);
         router.put("/api/user/:id").handler(this::updateUser);
 
+        // Bind "/api/chat" to the chat_table
+        router.get("/api/team").handler(this::getTeamScore);
+
         // Serve static resources from the /assets directory
         router.route("/assets/*").handler(StaticHandler.create("assets"));
     }
@@ -80,7 +83,7 @@ public class Server extends AbstractVerticle {
                 .put("host", "localhost")
                 .put("port", 3306)
                 .put("username", "root")
-                .put("password", "password")
+                .put("password", "vor9060sj")
                 .put("database", "geo_beers_wars");
         this.mySQLClient = MySQLClient.createShared(vertx, mySQLClientConfig);
         this.createPubTable();
@@ -164,6 +167,47 @@ public class Server extends AbstractVerticle {
         });
     }
 
+    private void getTeamScore(RoutingContext routingContext){
+
+        this.initDB();
+        this.mySQLClient.getConnection(resConnection -> {
+
+            if (resConnection.succeeded()) {
+                SQLConnection connection = resConnection.result();
+                System.out.print("Connexion established\n");
+                connection.query("SELECT team, SUM(u.score) FROM user_table u GROUP BY u.team;", resSelectTeam -> {
+
+                    if (resSelectTeam.succeeded()) {
+                        System.out.print("Select Team_score\n");
+
+                        // Encode JsonArray of the chat_table and send it
+                        routingContext.response()
+                                .putHeader("content-type", "application/json; charset=utf-8")
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .end(Json.encodePrettily(resSelectTeam.result().toJson().getMap().get("rows")));
+                        }else{
+                            System.out.print("Select team score failed\n");
+                            routingContext.response()
+                                .setStatusCode(400)
+                                .putHeader("content-type", "text/html")
+                                .putHeader("Access-Control-Allow-Origin", "*")
+                                .end(Json.encodePrettily("Select team score failed"));
+                    }
+                });
+                connection.close();
+                System.out.print("Connexion closed\n");
+
+            } else {
+                routingContext.response()
+                        .setStatusCode(400)
+                        .putHeader("content-type", "text/html")
+                        .putHeader("Access-Control-Allow-Origin", "*")
+                        .end(this.connexionFailed());
+            }
+        });
+
+    }
+
     private void createPubTable(){
 
         String sqlPub = "CREATE TABLE IF NOT EXISTS `pub_table` (" +
@@ -196,6 +240,7 @@ public class Server extends AbstractVerticle {
         });
     }
 
+
     /*
     Test if the connexion with MySQL database can be established
      */
@@ -209,7 +254,7 @@ public class Server extends AbstractVerticle {
                 System.out.print("Connexion closed\n");
 
             } else {
-                this.connexionFailed();
+                System.out.print("Connexion failed\n");
             }
         });
     }
@@ -220,7 +265,7 @@ public class Server extends AbstractVerticle {
     private void getChatTable(RoutingContext routingContext){
 
         //Need to initDB or this.mySQLClient = null
-        initDB();
+        //initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -265,7 +310,7 @@ public class Server extends AbstractVerticle {
     private void getUserTable(RoutingContext routingContext){
 
         //Need to initDB or this.mySQLClient = null
-        initDB();
+        //initDB();
         this.mySQLClient.getConnection(resConnection -> {
 
             if (resConnection.succeeded()) {
@@ -462,7 +507,7 @@ public class Server extends AbstractVerticle {
         Pub pub = Json.decodeValue(routingContext.getBodyAsString(),Pub.class);
         String sql = "INSERT INTO pub_table VALUES (?, ?, ?, ?);";
 
-        // Normalize icon name base for the db (and dumb ass front end..)
+        // Normalize icon name base for the db
         pub.setIcon(this.normalizeIcon(pub.getIcon()));
         JsonArray params = new JsonArray().addNull()
                 .add(pub.getLatitude())
@@ -688,14 +733,12 @@ public class Server extends AbstractVerticle {
      */
 
     private String connexionFailed(){
-        String fail = ("Connexion failed for:<br>" +
+        return "Connexion failed for:<br>" +
                 "host: "+mySQLClientConfig.getString("host")+"<br>"+
                 "port: "+mySQLClientConfig.getInteger("port").toString()+"<br>"+
                 "username: "+mySQLClientConfig.getString("username")+"<br>"+
                 "password: "+mySQLClientConfig.getString("password")+"<br>"+
-                "database: "+mySQLClientConfig.getString("database")+"<br>"
-        );
-        return fail;
+                "database: "+mySQLClientConfig.getString("database")+"<br>";
     }
 
     private String normalizeIcon(String icon){
