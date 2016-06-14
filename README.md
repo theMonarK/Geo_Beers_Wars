@@ -33,8 +33,8 @@ Add pub to pub_table
 * body: {"latitude":"69.696969", "longitude":"51.515151", "icon": "red"}
 
 Update pub
-* PUT http://localhost:5169/api/pub/id (http://localhost:5169/api/pub/1 for id 1)
-* body: {"latitude":"2.2", "longitude":"2.2", "icon": "rouge"}
+* PUT http://localhost:5169/api/pub/latitude (http://localhost:5169/api/pub/2.2 for latitude 2.2)
+* body: {"longitude":"2.2", "icon": "rouge"}
 
 Get pub ID
 * POST http://localhost:5169/api/pubId
