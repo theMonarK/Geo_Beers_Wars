@@ -47,6 +47,9 @@ Update user
 * PUT http://localhost:5169/api/user/id (http://localhost:5169/api/user/1 for id 1)
 * body: {"team":"bleu", "last_id_pub":"2"}
 
+Get team score
+* GET http://localhost:5169/api/team
+
 POST request will response with Json Object created in MySQL databse
 
 chat_table:
