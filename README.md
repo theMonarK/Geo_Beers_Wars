@@ -38,7 +38,7 @@ Update pub
 
 Get pub ID
 * POST http://localhost:5169/api/pubId
-*  {"latitude": "69.697", "longitude": "69.697"}
+* body: {"latitude": "69.697", "longitude": "69.697"}
 
 Get user_table:
 * GET http://localhost:5169/api/user
