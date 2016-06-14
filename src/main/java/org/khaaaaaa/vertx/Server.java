@@ -647,12 +647,12 @@ public class Server extends AbstractVerticle {
 
     private void updatePub(RoutingContext routingContext) {
 
-        final String latitude = routingContext.request().getParam("latitude");
+        final Float latitude = Float.parseFloat(routingContext.request().getParam("latitude"));
         JsonObject json = routingContext.getBodyAsJson();
-        String sqlUpdate = "UPDATE pub_table SET icon=? WHERE latitude = ? AND longitude=?";
-        JsonArray params = new JsonArray().add(json.getString("longitude"))
-                .add(json.getString("longitude"))
-                .add(this.normalizeIcon(json.getString("icon")));
+        String sqlUpdate = "UPDATE pub_table SET icon=? WHERE latitude=? AND longitude=?";
+        JsonArray params = new JsonArray().add(this.normalizeIcon(json.getString("icon")))
+                .add(latitude)
+                .add(json.getFloat("longitude"));
 
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
@@ -772,14 +772,14 @@ public class Server extends AbstractVerticle {
     private String normalizeIcon(String icon){
         switch(icon){
             case "rouge":
-                return ".../img/rouge.png";
+                return "../img/rouge.png";
             case "rose":
-                return ".../img/rose.png";
+                return "../img/rose.png";
             case "bleu":
-                return ".../img/bleu.png";
+                return "../img/bleu.png";
             case "vert":
-                return ".../img/vert.png";
+                return "../img/vert.png";
         }
-        return ".../img/rouge.png";
+        return "../img/rouge.png";
     }
 }
