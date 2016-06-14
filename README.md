@@ -74,6 +74,12 @@ user_table:
 * score
 * last_time
 
+Team:
+* Bleu
+* Rouge
+* Rose
+* Vert
+
 If Intellij suddenly throwing ClassNotFoundException
 * File --> Project Structure --> Modules
 * Dependencies & add slf4J-api-1.X.XX (see utils folder)
