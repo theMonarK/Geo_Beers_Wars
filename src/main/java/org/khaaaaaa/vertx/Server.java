@@ -60,7 +60,7 @@ public class Server extends AbstractVerticle {
 
         router.route("/api/pub*").handler(BodyHandler.create());
         router.post("/api/pub").handler(this::addPub);
-        router.put("/api/pub/:id").handler(this::updatePub);
+        router.put("/api/pub/:latitude").handler(this::updatePub);
         router.post("/api/pubId").handler(this::getIdPub);
 
         // Bind "/api/pub" to the pub_table
@@ -263,7 +263,7 @@ public class Server extends AbstractVerticle {
     private void getIdPub(RoutingContext routingContext) {
 
         final Pub pub = Json.decodeValue(routingContext.getBodyAsString(),Pub.class);
-        String sql = "SELECT id FROM pub_table WHERE latitude=? AND longitude=?";
+        String sql = "SELECT * FROM pub_table WHERE latitude=? AND longitude=?;";
         JsonArray params = new JsonArray().add(pub.getLatitude())
                 .add(pub.getLongitude());
 
@@ -272,7 +272,6 @@ public class Server extends AbstractVerticle {
                 SQLConnection connection = resConnection.result();
                 System.out.print("Connexion established\n");
                 connection.updateWithParams(sql, params, resUpdate -> {
-                    System.out.print("test");
                     if (resUpdate.succeeded()) {
                         pub.setId(resUpdate.result().getKeys().getInteger(0));
 
@@ -280,7 +279,7 @@ public class Server extends AbstractVerticle {
                         routingContext.response()
                                 .setStatusCode(201)
                                 .putHeader("content-type", "application/json; charset=utf-8")
-                                .end(Json.encodePrettily(pub));
+                                .end(Json.encodePrettily(pub.getId()));
                         connection.close();
                         System.out.print("Connexion closed\n");
                     }
@@ -648,13 +647,12 @@ public class Server extends AbstractVerticle {
 
     private void updatePub(RoutingContext routingContext) {
 
-        final String id = routingContext.request().getParam("id");
+        final String latitude = routingContext.request().getParam("latitude");
         JsonObject json = routingContext.getBodyAsJson();
-        String sqlUpdate = "UPDATE pub_table SET latitude = ?, longitude=?, icon=? WHERE id=?";
-        JsonArray params = new JsonArray().add(json.getString("latitude"))
+        String sqlUpdate = "UPDATE pub_table SET icon=? WHERE latitude = ? AND longitude=?";
+        JsonArray params = new JsonArray().add(json.getString("longitude"))
                 .add(json.getString("longitude"))
-                .add(this.normalizeIcon(json.getString("icon")))
-                .add(id);
+                .add(this.normalizeIcon(json.getString("icon")));
 
         this.mySQLClient.getConnection(resConnection -> {
             if (resConnection.succeeded()) {
