@@ -2,7 +2,7 @@
 Vert.X server with MySQL database for Geo Beers Wars web app
 
 Geo Beers Wars is a game when you have to win pubs in your town with your friends.
-You play with your team and need to be the more and the longuer in a pub to win. You can also chat on the app.
+You play with your team and need to be the more and the longer in a pub to win. You can also chat on the app.
 
 HTTP Server:
 * host: localhost
