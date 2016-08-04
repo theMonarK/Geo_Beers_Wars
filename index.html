@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Geo Beers Wars by theMonarK</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Geo Beers Wars</h1>
+      <h2 class="project-tagline">MySQL Server for Geo Beers Wars web app</h2>
+      <a href="https://github.com/theMonarK/Geo_Beers_Wars" class="btn">View on GitHub</a>
+      <a href="https://github.com/theMonarK/Geo_Beers_Wars/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/theMonarK/Geo_Beers_Wars/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="geo-beers-wars-the-game" class="anchor" href="#geo-beers-wars-the-game" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geo Beers Wars, the game.</h1>
+
+<p>Geo Beers Wars is a game when you have to win pubs in your town with your friends. You play with your team and need to be the more and the longer in a pub to win. You can also chat on the app.</p>
+
+<p>This is the Vert.X server with MySQL database for the web app (InteliJ used).</p>
+
+<h2>
+<a id="http-server" class="anchor" href="#http-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HTTP Server:</h2>
+
+<ul>
+<li>host: localhost</li>
+<li>port: 5169</li>
+</ul>
+
+<p>MySQL Database settings preffered (Configuration in server.initDB()):</p>
+
+<ul>
+<li>"host": "localhost"</li>
+<li>"port":3306</li>
+<li>"username":"root"</li>
+<li>"password":...</li>
+<li>"database":"geo_beers_wars"</li>
+</ul>
+
+<h2>
+<a id="requests" class="anchor" href="#requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requests:</h2>
+
+<h3>
+<a id="chat" class="anchor" href="#chat" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Chat:</h3>
+
+<p>Get chat_table:</p>
+
+<ul>
+<li>GET http://localhost:5169/api/chat</li>
+</ul>
+
+<p>Add chat to the chat_table:</p>
+
+<ul>
+<li>POST http://localhost:5169/api/pub</li>
+<li>body: {"from":"web", "to":"Khaaaaaa", "message": "What's up?"}</li>
+</ul>
+
+<h3>
+<a id="pub" class="anchor" href="#pub" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pub:</h3>
+
+<p>Get pub_table:</p>
+
+<ul>
+<li>GET http://localhost:5169/api/pub</li>
+</ul>
+
+<p>Add pub to pub_table</p>
+
+<ul>
+<li>POST http://localhost:5169/api/pub</li>
+<li>body: {"latitude":"69.696969", "longitude":"51.515151", "icon": "red"}</li>
+</ul>
+
+<p>Update pub</p>
+
+<ul>
+<li>PUT http://localhost:5169/api/pub/latitude (http://localhost:5169/api/pub/2.2 for latitude 2.2)</li>
+<li>body: {"longitude":2.2, "icon": "rouge"}</li>
+</ul>
+
+<p>Get pub ID</p>
+
+<ul>
+<li>POST http://localhost:5169/api/pubId</li>
+<li>body: {"latitude": "69.697", "longitude": "69.697"}</li>
+</ul>
+
+<h3>
+<a id="user" class="anchor" href="#user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>User:</h3>
+
+<p>Get user_table:</p>
+
+<ul>
+<li>GET http://localhost:5169/api/user</li>
+</ul>
+
+<p>Add user to user_table</p>
+
+<ul>
+<li>POST http://localhost:5169/api/user</li>
+<li>body: {"username":"Khaaaaaa", "password":"rate", "team": "rouge", "last_id_pub": 1}</li>
+</ul>
+
+<p>Update user</p>
+
+<ul>
+<li>PUT http://localhost:5169/api/user/id (http://localhost:5169/api/user/1 for id 1)</li>
+<li>body: {"team":"bleu", "last_id_pub":"2"}</li>
+</ul>
+
+<p>Get team score</p>
+
+<ul>
+<li>GET http://localhost:5169/api/team</li>
+</ul>
+
+<p>POST request will response with Json Object created in MySQL databse</p>
+
+<h2>
+<a id="tables-" class="anchor" href="#tables-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tables :</h2>
+
+<p>chat_table:</p>
+
+<ul>
+<li>id</li>
+<li>personFrom</li>
+<li>personTo</li>
+<li>message</li>
+<li>date</li>
+</ul>
+
+<p>pub_table:</p>
+
+<ul>
+<li>id</li>
+<li>latitude</li>
+<li>longitude</li>
+<li>icon</li>
+</ul>
+
+<p>user_table:</p>
+
+<ul>
+<li>id</li>
+<li>username</li>
+<li>password</li>
+<li>team</li>
+<li>last_id_pub</li>
+<li>score</li>
+<li>last_time</li>
+</ul>
+
+<p>Team:</p>
+
+<ul>
+<li>Bleu</li>
+<li>Rouge</li>
+<li>Rose</li>
+<li>Vert</li>
+</ul>
+
+<h3>
+<a id="note" class="anchor" href="#note" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Note</h3>
+
+<p>If Intellij suddenly throwing ClassNotFoundException</p>
+
+<ul>
+<li>File --&gt; Project Structure --&gt; Modules</li>
+<li>Dependencies &amp; add slf4J-api-1.X.XX (see utils folder)</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/theMonarK/Geo_Beers_Wars">Geo Beers Wars</a> is maintained by <a href="https://github.com/theMonarK">theMonarK</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
