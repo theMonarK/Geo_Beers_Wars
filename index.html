@@ -20,162 +20,149 @@
 
     <section class="main-content">
       <h1>
-<a id="geo-beers-wars-the-game" class="anchor" href="#geo-beers-wars-the-game" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geo Beers Wars, the game.</h1>
+<a id="geo_beers_wars" class="anchor" href="#geo_beers_wars" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Geo_Beers_Wars</h1>
 
-<p>Geo Beers Wars is a game when you have to win pubs in your town with your friends. You play with your team and need to be the more and the longer in a pub to win. You can also chat on the app.</p>
+<p>Vert.X server with MySQL database for Geo Beers Wars web app</p>
 
-<p>This is the Vert.X server with MySQL database for the web app (InteliJ used).</p>
+<p>Geo Beers Wars is a game when you have to win pubs in your town with your friends.
+You play with your team and need to be the more and the longer in a pub to win. You can also chat on the app.</p>
 
 <h2>
 <a id="http-server" class="anchor" href="#http-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HTTP Server:</h2>
 
-<ul>
-<li>host: localhost</li>
-<li>port: 5169</li>
-</ul>
+<pre><code> host: localhost
+ port: 5169
+</code></pre>
 
-<p>MySQL Database settings preffered (Configuration in server.initDB()):</p>
+<h2>
+<a id="mysql-database-settings-preffered-configuration-in-serverinitdb" class="anchor" href="#mysql-database-settings-preffered-configuration-in-serverinitdb" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>MySQL Database settings preffered (Configuration in server.initDB()):</h2>
 
-<ul>
-<li>"host": "localhost"</li>
-<li>"port":3306</li>
-<li>"username":"root"</li>
-<li>"password":...</li>
-<li>"database":"geo_beers_wars"</li>
-</ul>
+<pre><code> "host": "localhost"
+ "port":3306
+ "username":"root"
+ "password":...
+ "database":"geo_beers_wars"
+</code></pre>
 
 <h2>
 <a id="requests" class="anchor" href="#requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requests:</h2>
 
 <h3>
-<a id="chat" class="anchor" href="#chat" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Chat:</h3>
+<a id="get-chat_table" class="anchor" href="#get-chat_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Get chat_table:</h3>
 
-<p>Get chat_table:</p>
-
-<ul>
-<li>GET http://localhost:5169/api/chat</li>
-</ul>
-
-<p>Add chat to the chat_table:</p>
-
-<ul>
-<li>POST http://localhost:5169/api/pub</li>
-<li>body: {"from":"web", "to":"Khaaaaaa", "message": "What's up?"}</li>
-</ul>
+<pre><code> GET http://localhost:5169/api/chat
+</code></pre>
 
 <h3>
-<a id="pub" class="anchor" href="#pub" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pub:</h3>
+<a id="add-chat-to-the-chat_table" class="anchor" href="#add-chat-to-the-chat_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add chat to the chat_table:</h3>
 
-<p>Get pub_table:</p>
-
-<ul>
-<li>GET http://localhost:5169/api/pub</li>
-</ul>
-
-<p>Add pub to pub_table</p>
-
-<ul>
-<li>POST http://localhost:5169/api/pub</li>
-<li>body: {"latitude":"69.696969", "longitude":"51.515151", "icon": "red"}</li>
-</ul>
-
-<p>Update pub</p>
-
-<ul>
-<li>PUT http://localhost:5169/api/pub/latitude (http://localhost:5169/api/pub/2.2 for latitude 2.2)</li>
-<li>body: {"longitude":2.2, "icon": "rouge"}</li>
-</ul>
-
-<p>Get pub ID</p>
-
-<ul>
-<li>POST http://localhost:5169/api/pubId</li>
-<li>body: {"latitude": "69.697", "longitude": "69.697"}</li>
-</ul>
+<pre><code> POST http://localhost:5169/api/pub
+ body: {"from":"web", "to":"Khaaaaaa", "message": "What's up?"}
+</code></pre>
 
 <h3>
-<a id="user" class="anchor" href="#user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>User:</h3>
+<a id="get-pub_table" class="anchor" href="#get-pub_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Get pub_table:</h3>
 
-<p>Get user_table:</p>
+<pre><code> GET http://localhost:5169/api/pub
+</code></pre>
 
-<ul>
-<li>GET http://localhost:5169/api/user</li>
-</ul>
+<h3>
+<a id="add-pub-to-pub_table" class="anchor" href="#add-pub-to-pub_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add pub to pub_table</h3>
 
-<p>Add user to user_table</p>
+<pre><code> POST http://localhost:5169/api/pub
+ body: {"latitude":"69.696969", "longitude":"51.515151", "icon": "red"}
+</code></pre>
 
-<ul>
-<li>POST http://localhost:5169/api/user</li>
-<li>body: {"username":"Khaaaaaa", "password":"rate", "team": "rouge", "last_id_pub": 1}</li>
-</ul>
+<h3>
+<a id="update-pub" class="anchor" href="#update-pub" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Update pub</h3>
 
-<p>Update user</p>
+<pre><code> PUT http://localhost:5169/api/pub/latitude (http://localhost:5169/api/pub/2.2 for latitude 2.2)
+ body: {"longitude":2.2, "icon": "rouge"}
+</code></pre>
 
-<ul>
-<li>PUT http://localhost:5169/api/user/id (http://localhost:5169/api/user/1 for id 1)</li>
-<li>body: {"team":"bleu", "last_id_pub":"2"}</li>
-</ul>
+<h3>
+<a id="get-pub-id" class="anchor" href="#get-pub-id" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Get pub ID</h3>
 
-<p>Get team score</p>
+<pre><code> POST http://localhost:5169/api/pubId
+ body: {"latitude": "69.697", "longitude": "69.697"}
+</code></pre>
 
-<ul>
-<li>GET http://localhost:5169/api/team</li>
-</ul>
+<h3>
+<a id="get-user_table" class="anchor" href="#get-user_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Get user_table:</h3>
+
+<pre><code> GET http://localhost:5169/api/user
+</code></pre>
+
+<h3>
+<a id="add-user-to-user_table" class="anchor" href="#add-user-to-user_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Add user to user_table</h3>
+
+<pre><code> POST http://localhost:5169/api/user
+ body: {"username":"Khaaaaaa", "password":"rate", "team": "rouge", "last_id_pub": 1}
+</code></pre>
+
+<h3>
+<a id="update-user" class="anchor" href="#update-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Update user</h3>
+
+<pre><code> PUT http://localhost:5169/api/user/id (http://localhost:5169/api/user/1 for id 1)
+ body: {"team":"bleu", "last_id_pub":"2"}
+</code></pre>
+
+<h3>
+<a id="get-team-score" class="anchor" href="#get-team-score" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Get team score</h3>
+
+<pre><code> GET http://localhost:5169/api/team
+</code></pre>
 
 <p>POST request will response with Json Object created in MySQL databse</p>
 
 <h2>
-<a id="tables-" class="anchor" href="#tables-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tables :</h2>
+<a id="chat_table" class="anchor" href="#chat_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>chat_table:</h2>
 
-<p>chat_table:</p>
+<pre><code> id
+ personFrom
+ personTo
+ message
+ date
+</code></pre>
 
-<ul>
-<li>id</li>
-<li>personFrom</li>
-<li>personTo</li>
-<li>message</li>
-<li>date</li>
-</ul>
+<h2>
+<a id="pub_table" class="anchor" href="#pub_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pub_table:</h2>
 
-<p>pub_table:</p>
+<pre><code> id
+ latitude
+ longitude
+ icon
+</code></pre>
 
-<ul>
-<li>id</li>
-<li>latitude</li>
-<li>longitude</li>
-<li>icon</li>
-</ul>
+<h2>
+<a id="user_table" class="anchor" href="#user_table" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>user_table:</h2>
 
-<p>user_table:</p>
+<pre><code> id
+ username
+ password
+ team
+ last_id_pub
+ score
+ last_time
+</code></pre>
 
-<ul>
-<li>id</li>
-<li>username</li>
-<li>password</li>
-<li>team</li>
-<li>last_id_pub</li>
-<li>score</li>
-<li>last_time</li>
-</ul>
+<h2>
+<a id="team" class="anchor" href="#team" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Team:</h2>
 
-<p>Team:</p>
+<pre><code> Bleu
+ Rouge
+ Rose
+ Vert
+</code></pre>
 
-<ul>
-<li>Bleu</li>
-<li>Rouge</li>
-<li>Rose</li>
-<li>Vert</li>
-</ul>
-
-<h3>
-<a id="note" class="anchor" href="#note" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Note</h3>
+<h2>
+<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Notes:</h2>
 
 <p>If Intellij suddenly throwing ClassNotFoundException</p>
 
-<ul>
-<li>File --&gt; Project Structure --&gt; Modules</li>
-<li>Dependencies &amp; add slf4J-api-1.X.XX (see utils folder)</li>
-</ul>
+<pre><code> File --&gt; Project Structure --&gt; Modules
+ Dependencies &amp; add slf4J-api-1.X.XX (see utils folder)
+</code></pre>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/theMonarK/Geo_Beers_Wars">Geo Beers Wars</a> is maintained by <a href="https://github.com/theMonarK">theMonarK</a>.</span>
